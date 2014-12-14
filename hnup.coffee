@@ -46,12 +46,13 @@ module.exports = () ->
 				if not data[post]?
 					item_ref.child(post).once 'value', (snapshot) ->
 						item = snapshot.val()
-						data[item.id] = 
-							title: item.title
-							url: item.url
-							entry_at: null
-							history: []
-							peak_position: null
+						if item?
+							data[item.id] =
+								title: item.title
+								url: item.url
+								entry_at: null
+								history: []
+								peak_position: null
 						callback()
 				else
 					callback()
