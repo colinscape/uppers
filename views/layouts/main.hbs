@@ -1,7 +1,13 @@
 <doctype html>
 <html>
 <head>
-	<title>Colin's Experiments</title>
+	<title>
+		{{#if title}}
+			{{title}}
+		{{else}}
+			Colin's Experiments
+		{{/if}}
+	</title>
 </head>
 <body>
 	{{{body}}}

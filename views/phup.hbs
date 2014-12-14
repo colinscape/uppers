@@ -1,0 +1,13 @@
+<p>Product Hunt watch</p>
+
+<ul>
+	{{#each items}}
+		<li>
+			[{{peak_position}}]
+			<a href='{{url}}'>{{title}}</a>
+			{{#each tags}}
+				{{this}}
+			{{/each}}
+		</li>
+	{{/each}}
+</ul>

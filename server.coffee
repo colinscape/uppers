@@ -6,6 +6,9 @@ _ = require 'underscore'
 hnup = require './hnup'
 hnup()
 
+phup = require './phup'
+phup()
+
 app.engine 'hbs', expressHbs
   extname: 'hbs'
   defaultLayout: 'main.hbs'
@@ -35,6 +38,34 @@ app.get '/hnup', (req, res) ->
     items = _.sortBy items, (i) -> i.peak_position
 
     res.render 'hnup', 
+      title: 'Hacker News watch'
+      items: items
+
+  else
+    res.send "No data yet! Check back soon :)"
+
+app.get '/phup', (req, res) ->
+
+  if fs.existsSync './data/phup.json'
+    phup_json = fs.readFileSync './data/phup.json'
+    phup_data = JSON.parse phup_json
+
+    climbers = phup_data.climbers
+    rising_stars = phup_data.rising_stars
+    peakers = phup_data.peakers
+
+    _.each phup_data.data, (v) -> v.tags = []
+    _.map climbers, (c) -> phup_data.data[c].tags.push 'climber'
+    _.map rising_stars, (c) -> phup_data.data[c].tags.push 'rising-star'
+    _.map peakers, (c) -> phup_data.data[c].tags.push 'peaker'
+
+    interesting_ids = _.union climbers, rising_stars, peakers
+
+    items = _.values _.pick phup_data.data, interesting_ids
+    items = _.sortBy items, (i) -> i.peak_position
+
+    res.render 'phup', 
+      title: 'Product Hunt watch'
       items: items
 
   else

@@ -15,6 +15,7 @@
     "express-handlebars": "~1.1.0",
     "firebase": "~2.0.6",
     "async": "~0.9.0",
-    "coffee-script": "~1.8.0"
+    "coffee-script": "~1.8.0",
+    "request": "~2.51.0"
   }
 }
