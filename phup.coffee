@@ -35,7 +35,12 @@ module.exports = () ->
 			first = true
 
 		callback = (err, resp, body) ->
-			response = JSON.parse body
+
+			try
+				response = JSON.parse body
+			catch e
+				return
+
 			posts = response.posts
 			
 
