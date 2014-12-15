@@ -53,11 +53,15 @@ module.exports = () ->
 								entry_at: null
 								history: []
 								peak_position: null
+						else
+							callback 'null item'
 						callback()
 				else
 					callback()
 
 			async.each posts, get_details, (err) ->
+
+				if err? return
 
 				info = _.object posts, _.map posts, (id, i) ->
 					id: id
