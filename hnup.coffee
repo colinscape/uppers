@@ -61,7 +61,7 @@ module.exports = () ->
 
 			async.each posts, get_details, (err) ->
 
-				if err? return
+				if err? then return
 
 				info = _.object posts, _.map posts, (id, i) ->
 					id: id
