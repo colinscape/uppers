@@ -25,6 +25,8 @@ module.exports = () ->
 				rising_stars: []
 				climbers: []
 				peakers: []
+				uppers: []
+				toppers: []
 				data: {}
 				current_posts: []
 			data = {}
@@ -53,9 +55,9 @@ module.exports = () ->
 								entry_at: null
 								history: []
 								peak_position: null
+							callback()
 						else
 							callback 'null item'
-						callback()
 				else
 					callback()
 
@@ -87,6 +89,17 @@ module.exports = () ->
 				fallers = _.filter (_.keys info), (id) -> info[id].old_position? and info[id].new_position > info[id].old_position
 				unchanged = _.filter (_.keys info), (id) -> info[id].old_position? and info[id].new_position is info[id].old_position
 
+				uppers =  _.filter (_.keys info), (id) ->
+					if not data[id] or data[id].history.length < 2 then return false
+					zip = _.zip (_.initial data[id].history), (_.tail data[id].history)
+					changes = _.map zip, ([from, to]) -> from - to
+					ups = _.reduce changes, ((memo, num) -> memo + num), 0
+					return ups > 0
+
+				toppers = _.filter (_.keys info), (id) ->
+					if not data[id] then return false
+					console.log data[id].history
+					return _.any data[id].history, (h) -> h <= 10
 				###
 				console.log ""
 				console.log "New       : #{new_entries.length}"
@@ -95,7 +108,14 @@ module.exports = () ->
 				console.log "Unchanged : #{unchanged.length}"
 				console.log "Total     : #{new_entries.length + climbers.length + fallers.length + unchanged.length}"
 				###
+				for id in (_.sortBy uppers, (id) -> info[id].new_position - info[id].old_position)
+					console.log ""
+					console.log "UPPER #{info[id].old_position} -> #{info[id].new_position}"
+					console.log data[id].history
+					console.log "#{data[id].title}"
+					console.log data[id].url
 
+				###
 				for id in (_.sortBy peakers, (id) -> info[id].new_position - info[id].old_position)
 					console.log ""
 					console.log "PEAKER #{info[id].old_position} -> #{info[id].new_position}"
@@ -116,6 +136,7 @@ module.exports = () ->
 					console.log data[id].history
 					console.log "#{data[id].title}"
 					console.log data[id].url
+				###
 
 				current_rising_stars = _.difference (_.union hnup_data.rising_stars, rising_stars), fallers
 				current_peakers = _.difference (_.union hnup_data.peakers, peakers), fallers
@@ -127,6 +148,8 @@ module.exports = () ->
 					rising_stars: current_rising_stars 
 					peakers: current_peakers
 					climbers: current_climbers
+					uppers: uppers
+					toppers: toppers
 				fs.writeFileSync './data/hnup.json', JSON.stringify hnup_data
 					
 

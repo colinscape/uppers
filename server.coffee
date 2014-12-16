@@ -26,16 +26,20 @@ app.get '/hnup', (req, res) ->
     climbers = hnup_data.climbers
     rising_stars = hnup_data.rising_stars
     peakers = hnup_data.peakers
+    uppers = hnup_data.uppers
+    toppers = hnup_data.toppers
 
     _.each hnup_data.data, (v) -> v.tags = []
     _.map climbers, (c) -> hnup_data.data[c].tags.push 'climber'
     _.map rising_stars, (c) -> hnup_data.data[c].tags.push 'rising-star'
     _.map peakers, (c) -> hnup_data.data[c].tags.push 'peaker'
+    _.map uppers, (c) -> hnup_data.data[c].tags.push 'upper'
+    _.map toppers, (c) -> hnup_data.data[c].tags.push 'topper'
 
-    interesting_ids = _.union climbers, rising_stars, peakers
+    interesting_ids = uppers #_.union climbers, rising_stars, peakers
 
     items = _.values _.pick hnup_data.data, interesting_ids
-    items = _.sortBy items, (i) -> i.peak_position
+    items = _.sortBy items, (i) -> -1000*i.tags.length + i.peak_position
 
     res.render 'hnup', 
       title: 'Hacker News watch'
