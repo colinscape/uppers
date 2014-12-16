@@ -9,6 +9,10 @@ hnup()
 phup = require './phup'
 phup()
 
+redditup = require './redditup'
+redditup('tech')
+redditup('technews')
+
 app.engine 'hbs', expressHbs
   extname: 'hbs'
   defaultLayout: 'main.hbs'
@@ -70,6 +74,64 @@ app.get '/phup', (req, res) ->
 
     res.render 'phup', 
       title: 'Product Hunt watch'
+      items: items
+
+  else
+    res.send "No data yet! Check back soon :)"
+
+
+app.get '/redditup_tech', (req, res) ->
+
+  if fs.existsSync './data/redditup_tech.json'
+    json = fs.readFileSync './data/redditup_tech.json'
+    data = JSON.parse json
+
+    climbers = data.climbers
+    rising_stars = data.rising_stars
+    peakers = data.peakers
+
+    _.each data.data, (v) -> v.tags = []
+    _.map climbers, (c) -> data.data[c].tags.push 'climber'
+    _.map rising_stars, (c) -> data.data[c].tags.push 'rising-star'
+    _.map peakers, (c) -> data.data[c].tags.push 'peaker'
+
+    interesting_ids = _.union climbers, rising_stars, peakers
+
+    items = _.values _.pick data.data, interesting_ids
+    items = _.sortBy items, (i) -> i.peak_position
+
+    res.render 'redditup',
+      title: 'Reddit Tech watch'
+      subreddit: 'Tech'
+      items: items
+
+  else
+    res.send "No data yet! Check back soon :)"
+
+
+app.get '/redditup_technews', (req, res) ->
+
+  if fs.existsSync './data/redditup_technews.json'
+    json = fs.readFileSync './data/redditup_technews.json'
+    data = JSON.parse json
+
+    climbers = data.climbers
+    rising_stars = data.rising_stars
+    peakers = data.peakers
+
+    _.each data.data, (v) -> v.tags = []
+    _.map climbers, (c) -> data.data[c].tags.push 'climber'
+    _.map rising_stars, (c) -> data.data[c].tags.push 'rising-star'
+    _.map peakers, (c) -> pata.data[c].tags.push 'peaker'
+
+    interesting_ids = _.union climbers, rising_stars, peakers
+
+    items = _.values _.pick data.data, interesting_ids
+    items = _.sortBy items, (i) -> i.peak_position
+
+    res.render 'redditup',
+      title: 'Reddit Tech News watch'
+      subreddit: 'Tech News'
       items: items
 
   else

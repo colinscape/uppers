@@ -98,7 +98,6 @@ module.exports = () ->
 
 				toppers = _.filter (_.keys info), (id) ->
 					if not data[id] then return false
-					console.log data[id].history
 					return _.any data[id].history, (h) -> h <= 10
 				###
 				console.log ""
@@ -108,12 +107,15 @@ module.exports = () ->
 				console.log "Unchanged : #{unchanged.length}"
 				console.log "Total     : #{new_entries.length + climbers.length + fallers.length + unchanged.length}"
 				###
+
+				###
 				for id in (_.sortBy uppers, (id) -> info[id].new_position - info[id].old_position)
 					console.log ""
 					console.log "UPPER #{info[id].old_position} -> #{info[id].new_position}"
 					console.log data[id].history
 					console.log "#{data[id].title}"
 					console.log data[id].url
+				###
 
 				###
 				for id in (_.sortBy peakers, (id) -> info[id].new_position - info[id].old_position)

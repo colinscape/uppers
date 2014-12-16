@@ -92,6 +92,7 @@ module.exports = () ->
 			console.log "Total     : #{new_entries.length + climbers.length + fallers.length + unchanged.length}"
 			###
 
+			###
 			for id in (_.sortBy peakers, (id) -> info[id].new_position - info[id].old_position)
 				console.log ""
 				console.log "PEAKER #{info[id].old_position} -> #{info[id].new_position}"
@@ -112,6 +113,7 @@ module.exports = () ->
 				console.log data[id].history
 				console.log "#{data[id].title}"
 				console.log data[id].url
+			###
 
 			current_rising_stars = _.difference (_.union phup_data.rising_stars, rising_stars), fallers
 			current_peakers = _.difference (_.union phup_data.peakers, peakers), fallers
