@@ -43,7 +43,7 @@ app.get '/hnup', (req, res) ->
     interesting_ids = uppers #_.union climbers, rising_stars, peakers
 
     items = _.values _.pick hnup_data.data, interesting_ids
-    items = _.sortBy items, (i) -> -1000*i.tags.length + i.peak_position
+    items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
 
     res.render 'hnup', 
       title: 'Hacker News watch'
