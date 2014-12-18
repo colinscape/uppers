@@ -40,7 +40,7 @@ app.get '/hnup', (req, res) ->
     _.map uppers, (c) -> hnup_data.data[c].tags.push 'upper'
     _.map toppers, (c) -> hnup_data.data[c].tags.push 'topper'
 
-    interesting_ids = uppers #_.union climbers, rising_stars, peakers
+    interesting_ids = _.union climbers, rising_stars, peakers, uppers, toppers
 
     items = _.values _.pick hnup_data.data, interesting_ids
     items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
