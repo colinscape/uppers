@@ -122,7 +122,7 @@ app.get '/redditup_technews', (req, res) ->
     _.each data.data, (v) -> v.tags = []
     _.map climbers, (c) -> data.data[c].tags.push 'climber'
     _.map rising_stars, (c) -> data.data[c].tags.push 'rising-star'
-    _.map peakers, (c) -> pata.data[c].tags.push 'peaker'
+    _.map peakers, (c) -> data.data[c].tags.push 'peaker'
 
     interesting_ids = _.union climbers, rising_stars, peakers
 
