@@ -35,7 +35,7 @@ class Source
 			@interesting = []
 			@save []
 
-		setInterval (_.bind @update, this), 30000
+		setInterval (_.bind @update, this), @interval
 
 
 	update: () ->
