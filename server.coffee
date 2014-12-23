@@ -3,15 +3,13 @@ app = express();
 expressHbs = require 'express-handlebars'
 fs = require 'fs'
 _ = require 'underscore'
+Source = require './source'
+
 hnup = require './hnup'
-hnup()
+hnup_source = new Source 'hnup', hnup, 30000
 
 phup = require './phup'
-phup()
-
-redditup = require './redditup'
-redditup('tech')
-redditup('technews')
+phup_source = new Source 'phup', phup, 30000
 
 app.engine 'hbs', expressHbs
   extname: 'hbs'
@@ -23,61 +21,68 @@ app.get '/', (req, res) ->
 
 app.get '/hnup', (req, res) ->
 
-  if fs.existsSync './data/hnup.json'
-    hnup_json = fs.readFileSync './data/hnup.json'
-    hnup_data = JSON.parse hnup_json
+  data = hnup_source
 
-    climbers = hnup_data.climbers
-    rising_stars = hnup_data.rising_stars
-    peakers = hnup_data.peakers
-    uppers = hnup_data.uppers
-    toppers = hnup_data.toppers
+  if not data.interesting? or data.interesting.length is 0 then return res.send "No data yet! Check back soon :)"
 
-    _.each hnup_data.data, (v) -> v.tags = []
-    _.map climbers, (c) -> hnup_data.data[c].tags.push 'climber'
-    _.map rising_stars, (c) -> hnup_data.data[c].tags.push 'rising-star'
-    _.map peakers, (c) -> hnup_data.data[c].tags.push 'peaker'
-    _.map uppers, (c) -> hnup_data.data[c].tags.push 'upper'
-    _.map toppers, (c) -> hnup_data.data[c].tags.push 'topper'
+  newcomers = data.newcomers
+  dropouts = data.dropouts
 
-    interesting_ids = _.union climbers, rising_stars, peakers, uppers
+  climbers = data.climbers
+  unchanged = data.unchanged
+  fallers = data.fallers
 
-    items = _.values _.pick hnup_data.data, interesting_ids
-    items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
+  peakers = data.peakers
+  rising_stars = data.rising_stars
+  
 
-    res.render 'hnup', 
-      title: 'Hacker News watch'
-      items: items
+  _.each data.data, (v) -> v.tags = []
+  _.map newcomers, (c) -> data.data[c].tags.push 'newcomer'
+  _.map climbers, (c) -> data.data[c].tags.push 'climber'
+  _.map peakers, (c) -> data.data[c].tags.push 'peaker'
+  _.map rising_stars, (c) -> data.data[c].tags.push 'rising-star'
 
-  else
-    res.send "No data yet! Check back soon :)"
+  items = _.values _.pick data.data, data.interesting
+  items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
+
+  res.render 'hnup', 
+    title: 'Hacker News watch'
+    items: items
+
+
 
 app.get '/phup', (req, res) ->
 
-  if fs.existsSync './data/phup.json'
-    phup_json = fs.readFileSync './data/phup.json'
-    phup_data = JSON.parse phup_json
+  if not fs.existsSync './data/phup.json' then res.send "No data yet! Check back soon :)"
 
-    climbers = phup_data.climbers
-    rising_stars = phup_data.rising_stars
-    peakers = phup_data.peakers
+  json = fs.readFileSync './data/phup.json'
+  data = JSON.parse json
 
-    _.each phup_data.data, (v) -> v.tags = []
-    _.map climbers, (c) -> phup_data.data[c].tags.push 'climber'
-    _.map rising_stars, (c) -> phup_data.data[c].tags.push 'rising-star'
-    _.map peakers, (c) -> phup_data.data[c].tags.push 'peaker'
+  newcomers = data.newcomers
+  dropouts = data.dropouts
 
-    interesting_ids = _.union climbers, rising_stars, peakers
+  climbers = data.climbers
+  unchanged = data.unchanged
+  fallers = data.fallers
 
-    items = _.values _.pick phup_data.data, interesting_ids
-    items = _.sortBy items, (i) -> i.peak_position
+  peakers = data.peakers
+  rising_stars = data.rising_stars
+  
 
-    res.render 'phup', 
-      title: 'Product Hunt watch'
-      items: items
+  _.each data.data, (v) -> v.tags = []
+  _.map newcomers, (c) -> data.data[c].tags.push 'newcomer'
+  _.map climbers, (c) -> data.data[c].tags.push 'climber'
+  _.map peakers, (c) -> data.data[c].tags.push 'peaker'
+  _.map rising_stars, (c) -> data.data[c].tags.push 'rising-star'
 
-  else
-    res.send "No data yet! Check back soon :)"
+  interesting_ids = _.union newcomers, climbers, peakers, rising_stars
+
+  items = _.values _.pick data.data, interesting_ids
+  items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
+
+  res.render 'phup', 
+    title: 'Product Hunt watch'
+    items: items
 
 
 app.get '/redditup_tech', (req, res) ->
