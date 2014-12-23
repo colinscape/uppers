@@ -17,7 +17,6 @@ module.exports = (old_ids, cb) ->
 				item_ref.child(post).once 'value', (snapshot) ->
 					item = snapshot.val()
 					if item?
-						console.log item
 						new_info[item.id] =
 							title: item.title
 							url: item.url
