@@ -15,6 +15,12 @@ redditup = require './redditup'
 redditup_tech = redditup 'tech'
 redditup_tech_source = new Source app, 'redditup_tech', 'Reddit Tech watch', 'redditup', redditup_tech, 30000
 
+lobstersup = require './lobsters'
+lobstersup_source = new Source app, 'lobstersup', 'Lobsters watch', 'lobstersup', lobstersup, 30000
+
+recodeup = require './recode'
+recodeup_source = new Source app, 'recodeup', 'Re/code watch', 'recodeup', recodeup, 30000
+
 
 app.engine 'hbs', expressHbs
   extname: 'hbs'
