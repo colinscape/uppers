@@ -20,7 +20,6 @@ module.exports = (old_ids, cb) ->
 			return cb "Failed to parse JSON"
 
 		posts = response.posts
-		posts = _.sortBy posts, (post) -> -post.votes_count
 		new_info = {}
 		for post in posts
 
@@ -28,6 +27,6 @@ module.exports = (old_ids, cb) ->
 				new_info[post.id] = 
 					title: post.name
 					url: post.redirect_url
-					comments: posts.discussion_url
+					comments: post.discussion_url
 
 		cb null, new_info, (_.pluck posts, 'id')

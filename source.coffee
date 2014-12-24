@@ -4,7 +4,7 @@ fs = require 'fs'
 
 class Source
 
-	constructor: (@name, @retriever, @interval) ->
+	constructor: (@app, @name, @title, @template, @retriever, @interval) ->
 
 		if not fs.existsSync './data'
 			fs.mkdirSync './data'
@@ -36,6 +36,34 @@ class Source
 			@save []
 
 		setInterval (_.bind @update, this), @interval
+
+
+		app.get "/#{name}" , (req, res) =>
+			if not @interesting? or @interesting.length is 0 then return res.send "No data yet! Check back soon :)"
+
+			newcomers = @newcomers
+			dropouts = @dropouts
+
+			climbers = @climbers
+			unchanged = @unchanged
+			fallers = @fallers
+
+			peakers = @peakers
+			rising_stars = @rising_stars
+
+
+			_.each @data, (v) -> v.tags = []
+			_.map newcomers, (c) => @data[c].tags.push 'newcomer'
+			_.map climbers, (c) => @data[c].tags.push 'climber'
+			_.map peakers, (c) => @data[c].tags.push 'peaker'
+			_.map rising_stars, (c) => @data[c].tags.push 'rising-star'
+
+			items = _.values _.pick @data, @interesting
+			items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
+
+			res.render @template,
+				title: @title
+				items: items
 
 
 	update: () ->
