@@ -33,6 +33,7 @@ module.exports = (old_ids, cb) ->
 			.on 'article', callback
 			.on 'end', () ->
 				cb null, new_info, new_post_ids
+			.on 'error', cb
 
 
 
