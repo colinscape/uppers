@@ -8,6 +8,7 @@ Source = require './source'
 hnup = require './hnup'
 hnup_source = new Source app, 'hnup', 'Hacker News watch', 'hnup', hnup, 30000
 
+###
 phup = require './phup'
 phup_source = new Source app, 'phup', 'Product Hunt watch', 'phup', phup, 30000
 
@@ -20,7 +21,7 @@ lobstersup_source = new Source app, 'lobstersup', 'Lobsters watch', 'lobstersup'
 
 recodeup = require './recode'
 recodeup_source = new Source app, 'recodeup', 'Re/code watch', 'recodeup', recodeup, 30000
-
+###
 
 app.engine 'hbs', expressHbs
   extname: 'hbs'
