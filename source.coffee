@@ -39,25 +39,9 @@ class Source
 
 
 		app.get "/#{name}" , (req, res) =>
+
+			@interesting = @find_interesting()
 			if not @interesting? or @interesting.length is 0 then return res.send "No data yet! Check back soon :)"
-
-			newcomers = @newcomers
-
-			climbers = @climbers
-			unchanged = @unchanged
-			fallers = @fallers
-			hidden_gems = @hidden_gems
-
-			peakers = @peakers
-			rising_stars = @rising_stars
-
-			_.each @data, (v) -> v.tags = []
-			_.map newcomers, (c) => @data[c].tags.push 'newcomer'
-			_.map climbers, (c) => @data[c].tags.push 'climber'
-			_.map peakers, (c) => @data[c].tags.push 'peaker'
-			_.map rising_stars, (c) => @data[c].tags.push 'rising-star'
-			_.map hidden_gems, (c) => @data[c].tags.push 'hidden-gem'
-
 			items = _.values _.pick @data, @interesting
 			items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
 
@@ -66,7 +50,35 @@ class Source
 				items: items
 
 
+	find_interesting: () ->
+
+		interesting = _.union @newcomers, @climbers, @hidden_gems, @peakers, @rising_stars
+
+		newcomers = @newcomers
+		climbers = @climbers
+		unchanged = @unchanged
+		fallers = @fallers
+		hidden_gems = @hidden_gems
+
+		peakers = @peakers
+		rising_stars = @rising_stars
+
+		_.each @data, (v) -> v.tags = []
+		_.map newcomers, (c) => @data[c].tags.push 'newcomer'
+		_.map climbers, (c) => @data[c].tags.push 'climber'
+		_.map peakers, (c) => @data[c].tags.push 'peaker'
+		_.map rising_stars, (c) => @data[c].tags.push 'rising-star'
+		_.map hidden_gems, (c) => @data[c].tags.push 'hidden-gem'
+
+		_.each interesting, (i) =>
+			if not @data[i].published?
+				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
+				@data[i].published = true
+
+		return interesting
+
 	update: () ->
+
 		old_post_ids = _.clone @current_post_ids
 		@retriever @current_post_ids, (err, new_info, current_post_ids) =>
 
@@ -108,7 +120,7 @@ class Source
 		@rising_stars = _.filter @current_post_ids, (id) => (@data[id].history.length) > 1 and
 			_.isEqual @data[id].history, (_.sortBy @data[id].history, (h) => -h)
 
-		@interesting = _.union @newcomers, @climbers, @peakers, @rising_stars
+		@interesting = @find_interesting()
 
 		info = 
 			data: @data
