@@ -77,7 +77,7 @@ class Source
 			if not @data[i].published?
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
 				options =
-					url: 'https://api.bufferapp.com/1/updates/create.json?access_token=1%2Fa1735d59f323604cb18518c990ec8d9d', 
+					url: "https://api.bufferapp.com/1/updates/create.json?access_token=#{encodeURIComponent process.env.BUFFER_ACCESS_TOKEN}", 
 					form:
 						text: "#{@data[i].title} - #{@data[i].url}"
 						'profile_ids[]': '54fea493c6537ca302067968'
