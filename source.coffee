@@ -70,6 +70,8 @@ class Source
 		_.map rising_stars, (c) => @data[c].tags.push 'rising-star'
 		_.map hidden_gems, (c) => @data[c].tags.push 'hidden-gem'
 
+		interesting = _.filter interesting, (i) => @data[i].tags.length > 1
+
 		_.each interesting, (i) =>
 			if not @data[i].published?
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
