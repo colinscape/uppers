@@ -1,6 +1,7 @@
 _ = require 'underscore'
 async = require 'async'
 fs = require 'fs'
+request = require 'request'
 
 class Source
 
@@ -75,6 +76,14 @@ class Source
 		_.each interesting, (i) =>
 			if not @data[i].published?
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
+				options =
+					url: 'https://api.bufferapp.com/1/updates/create.json?access_token=1%2Fa1735d59f323604cb18518c990ec8d9d', 
+					form:
+						text: "#{@data[i].title} - #{@data[i].url}"
+						'profile_ids[]': '54fea493c6537ca302067968'
+				request.post options, (err, resp, body) ->
+					if err? then console.error err
+
 				@data[i].published = true
 
 		return interesting
