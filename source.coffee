@@ -41,7 +41,6 @@ class Source
 
 		app.get "/#{name}" , (req, res) =>
 
-			@interesting = @find_interesting()
 			if not @interesting? or @interesting.length is 0 then return res.send "No data yet! Check back soon :)"
 			items = _.values _.pick @data, @interesting
 			items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
@@ -71,20 +70,27 @@ class Source
 		_.map rising_stars, (c) => @data[c].tags.push 'rising-star'
 		_.map hidden_gems, (c) => @data[c].tags.push 'hidden-gem'
 
-		interesting = _.filter interesting, (i) => @data[i].tags.length > 1
+
+		interesting = _.filter interesting, (i) => @data[i].tags.length > 2
+		uninteresting = _.filter @current_post_ids, (i) -> not _.contains interesting, i
+		console.log "Interesting: #{interesting.length}"
+
+		_.each uninteresting, (i) => @data[i].score = 0
 
 		_.each interesting, (i) =>
-			if not @data[i].published?
+
+			if not @data[i].score? then @data[i].score = 0
+			@data[i].score = @data[i].score + 1
+
+			if @data[i].score is 5
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
 				options =
 					url: "https://api.bufferapp.com/1/updates/create.json?access_token=#{encodeURIComponent process.env.BUFFER_ACCESS_TOKEN}", 
 					form:
-						text: "#{@data[i].title} - #{@data[i].url}"
+						text: "#{@data[i].title} - #{@data[i].url or @data[i].comments}"
 						'profile_ids[]': '54fea493c6537ca302067968'
 				request.post options, (err, resp, body) ->
 					if err? then console.error err
-
-				@data[i].published = true
 
 		return interesting
 
@@ -118,12 +124,12 @@ class Source
 		@climbers = _.filter @current_post_ids, (id) =>
 			current_position = _.last @data[id].history
 			previous_position = _.last (_.without @data[id].history, current_position)
-			return not previous_position? or previous_position > (current_position + 1)
+			return previous_position? and previous_position > current_position
 		@unchanged = _.filter @current_post_ids, (id) => (@data[id].history.length > 1) and (_.last @data[id].history) is (_.last _.initial @data[id].history)
 		@fallers = _.filter @current_post_ids, (id) =>
 			current_position = _.last @data[id].history
 			previous_position = _.last (_.without @data[id].history, current_position)
-			return not previous_position? or previous_position < (current_position - 1)
+			return previous_position? and previous_position < current_position
 		@hidden_gems = @current_post_ids[30..]
 
 		@peakers = _.filter @current_post_ids, (id) => (_.last @data[id].history) is @data[id].peak_position
