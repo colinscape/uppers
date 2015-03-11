@@ -71,7 +71,7 @@ class Source
 		_.map hidden_gems, (c) => @data[c].tags.push 'hidden-gem'
 
 
-		interesting = _.filter interesting, (i) => @data[i].tags.length > 2
+		interesting = _.filter interesting, (i) => @data[i].tags.length > 2 and not @data[i].published?
 		uninteresting = _.filter @current_post_ids, (i) -> not _.contains interesting, i
 		console.log "Interesting: #{interesting.length}"
 
@@ -84,6 +84,7 @@ class Source
 
 			if @data[i].score is 5
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
+				@data[i].published = true
 				options =
 					url: "https://api.bufferapp.com/1/updates/create.json?access_token=#{encodeURIComponent process.env.BUFFER_ACCESS_TOKEN}", 
 					form:
