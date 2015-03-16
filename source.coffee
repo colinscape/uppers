@@ -36,11 +36,13 @@ class Source
 			@interesting = []
 			@save []
 
-		setInterval (_.bind @update, this), @interval
+		@update()
+		#setInterval (_.bind @update, this), @interval
 
 
 		app.get "/#{name}" , (req, res) =>
 
+			console.log "Web call"
 			if not @interesting? or @interesting.length is 0 then return res.send "No data yet! Check back soon :)"
 			items = _.values _.pick @data, @interesting
 			items = _.sortBy items, (i) -> -1000*i.tags.length - i.peak_position
@@ -73,25 +75,24 @@ class Source
 
 		interesting = _.filter interesting, (i) => @data[i].tags.length > 2 and not @data[i].published?
 		uninteresting = _.filter @current_post_ids, (i) -> not _.contains interesting, i
-		console.log "Interesting: #{interesting.length}"
-
-		_.each uninteresting, (i) => @data[i].score = 0
+		_.each uninteresting, ((ui) ->
+			@data[ui].score = 0), this
 
 		_.each interesting, (i) =>
 
 			if not @data[i].score? then @data[i].score = 0
 			@data[i].score = @data[i].score + 1
 
-			if @data[i].score is 5
+			if @data[i].score is 20
 				console.log "#{new Date()}[#{@data[i].peak_position}] #{@data[i].title} [#{@data[i].tags.join ' '}]"
 				@data[i].published = true
 				options =
-					url: "https://api.bufferapp.com/1/updates/create.json?access_token=#{encodeURIComponent process.env.BUFFER_ACCESS_TOKEN}", 
+					url: "https://api.bufferapp.com/1/updates/create.json?access_token=#{encodeURIComponent 'ACCESS_TOKEN'}", 
 					form:
 						text: "#{@data[i].title} - #{@data[i].url or @data[i].comments}"
 						'profile_ids[]': '54fea493c6537ca302067968'
-				request.post options, (err, resp, body) ->
-					if err? then console.error err
+				#request.post options, (err, resp, body) ->
+				#	if err? then console.error err
 
 		return interesting
 
@@ -102,8 +103,20 @@ class Source
 
 			if err? then return
 
+			stringed_current_post_ids = _.map current_post_ids, (i) -> "#{i}"
+			_.each @data, (v,k,l) =>
+				if not _.contains stringed_current_post_ids, k
+					console.log "Deleting #{k}"
+					delete @data[k]
+			console.log "New data size: #{_.size @data}"
 			for id, info of new_info
 				@data[id] = info
+
+			published = _.filter current_post_ids, (i) => @data[i].published?
+			console.log "#{published.length} published"
+			scored = _.filter current_post_ids, (i) => @data[i].score and @data[i].score > 0
+			console.log "#{scored.length} scoring"
+
 
 			@current_post_ids = current_post_ids
 
@@ -115,6 +128,7 @@ class Source
 				if not @data[id].peak_position? or @data[id].peak_position > (index+1) then @data[id].peak_position = (index+1)
 
 			@save old_post_ids
+			setTimeout (_.bind @update, this), @interval
 
 	save: (old_post_ids) ->
 
